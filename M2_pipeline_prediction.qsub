@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#$ -V             # Pass environment variables to the job
+#$ -N CPO_pipeline    # Replace with a more specific job name
+#$ -wd /home/jjjjia/testCases           # Use the current working dir
+#$ -pe smp 8      # Parallel Environment (how many cores)
+#$ -l h_vmem=11G  # Memory (RAM) allocation *per core*
+#$ -e ./logs/$JOB_ID.err
+#$ -o ./logs/$JOB_ID.log
+#$ -m ea
+#$ -M bja20@sfu.ca
+
+#parameters: ~/scripts/pipeline.qsub -i $i -a $CONTIG -o /home/jjjjia/testCases/pipelineResultsQsubTest -e "Klebsiella pneumoniae";
+
+source activate py36
+
+python ~/scripts/pipeline_prediction.py "$@"
+
+source deactivate
+
+
+#submitting multiple joibs
+#for i in `cat /data/jjjjia/seqs.test`;
+#do
+#R1="/data/jjjjia/R1/"$i"_L001_R1_001.fastq.gz"
+#R2="/data/jjjjia/R2/"$i"_L001_R2_001.fastq.gz"
+#echo "$i"
+#echo "$R1"
+#echo "$R2"
+#qsub ~/scripts/pipeline.qsub -i $i -f $R1 -r $R2 -m /home/jjjjia/databases/RefSeqSketchesDefaults.msh -o pipelineResultsQsubTest -s /home/jjjjia/databases/scheme_species_map.tab -e "Klebsiella pneumoniae" -k /home/jjjjia/scripts/pipeline.sh;
+#done;
