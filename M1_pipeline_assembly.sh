@@ -12,7 +12,7 @@
 #J-J-J-Jia @ pipeline_assembly.sh: assemble the reads.	then do QA on them	with busco and quast																									#
 #input parameters: 1 = id, 2= forward, 3 = reverse, 4 = output, 5=tmpdir for shovill, 6=reference genome, 7=buscoDB																					#
 #Requires: shovill, bbmap, quast and busco (all conda-ble)																																			#
-#~/scripts/pipeline_assembly.sh BC11 /data/jjjjia/R1/BC11-Kpn005_S2_L001_R1_001.fastq.gz /data/jjjjia/R2/BC11-Kpn005_S2_L001_R2_001.fastq.gz /home/jjjjia/testCases/tests /home/jjjjia/testCases/tests/shovilltemp /home/jjjjia/testCases/tests/references/refbc11 /home/jjjjia/databases/enterobacteriales_odb9/
+# pipeline_assembly.sh BC11 BC11-Kpn005_S2_L001_R1_001.fastq.gz BC11-Kpn005_S2_L001_R2_001.fastq.gz output /home/dfornika/tmp/shovill /home/jjjjia/testCases/tests/references/refbc11 /data/ref_databases/busco/enterobacteriales_odb9
 #####################################################################################################################################################################################################
 
 ID="$1"
