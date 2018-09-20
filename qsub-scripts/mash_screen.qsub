@@ -1,0 +1,87 @@
+#!/bin/bash
+#$ -V             # Pass environment variables to the job
+#$ -N mash_screen
+#$ -cwd           # Use the current working dir		 
+#$ -pe smp 8      # Parallel Environment (how many cores)
+#$ -l h_vmem=2G   # Memory (RAM) allocation *per core*   
+
+USAGE="qsub $(basename "$0") [-h] -i|--input INPUT -q|--queries QUERIES -p|--pool POOL -o|--output OUTPUT\n\
+\n\
+optional arguments:\n\
+  -h, --help \t\t\t Show this help message and exit\n\
+"
+
+if [[ ( $1 == "--help") ||  $1 == "-h" ]];
+then 
+  echo -e "Usage: ${USAGE}"
+  exit 0
+fi
+
+MASH_VERSION="2.0"
+
+INPUT=""
+PARALLELISM="8"
+WINNER_TAKES_ALL=true
+QUERIES=""
+POOL=""
+POSITIONAL=()
+
+while [[ $# -gt 0 ]]
+do
+  key="$1"
+  
+  case $key in
+    -o|--output_prefix)
+    # Directory to write output
+    OUTPUT_PREFIX="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -i|--input)
+    # Base directory for run (must contain a 'fast5' subdir)
+    INPUT="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--pool)
+    POOL="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -k|--kmer_size)
+    KMER_SIZE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -m|--minimum_copies)
+    # No value, just the argument
+    MINIMUM_COPIES="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+  esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+echo INPUT            = "${INPUT}"
+echo OUTPUT_PREFIX    = "${OUTPUT_PREFIX}"
+echo MINIMUM_COPIES   = "${MINIMUM_COPIES}"
+echo WINNER_TAKES_ALL = "${WINNER_TAKES_ALL}"
+echo POSITIONAL       = "${@}"
+
+source activate mash-"${MASH_VERSION}"
+
+# Run mash screen
+mash screen \
+  -o "${OUTPUT_PREFIX}" \
+  -p "${PARALLELISM}" \
+  -k "${KMER_SIZE}" \
+  $( if [ "$WINNER_TAKES_ALL" = true ]; then echo "-w"; fi ) \
+  "${@}" \
+  "${QUERIES}" \
+  "${POOL}"
+
