@@ -3,7 +3,7 @@
 #$ -S /home/dfornika/miniconda3/envs/cpo_pipeline/bin/python
 #$ -V                         # Pass environment variables to the job
 #$ -N CPO_pipeline
-#$ -wd /home/jjjjia/testCases # Use the current working dir
+#$ -cwd /home/jjjjia/testCases # Use the current working dir
 #$ -pe smp 8                  # Parallel Environment (how many cores)
 #$ -l h_vmem=11G              # Memory (RAM) allocation *per core*
 #$ -e ./logs/$JOB_ID.err
@@ -13,7 +13,7 @@
 
 #This script is a wrapper for module one of the cpo_workflow including QC and Assembly. It uses Mash2.0, Kraken2.0 and fastqc to check for sequence contamination, quality information and identify a reference genome. Then attempts to assemble the reads, attempting to filter contamination away if required.
 
-# >~/scripts/pipeline.py -i BC11-Kpn005_S2 -f /data/jjjjia/R1/BC11-Kpn005_S2_L001_R1_001.fastq.gz -r /data/jjjjia/R2/BC11-Kpn005_S2_L001_R2_001.fastq.gz -o pipelineResultsQsub -e "Klebsiella pneumoniae" 
+# pipeline.py -i BC11-Kpn005_S2 -f BC11-Kpn005_S2_L001_R1_001.fastq.gz -r BC11-Kpn005_S2_L001_R2_001.fastq.gz -o pipelineResultsQsub -e "Klebsiella pneumoniae" 
 
 # Requires pipeline_qc.sh, pipeline_assembly.sh, pipeline_assembly_contaminant.sh. where these scripts are located can be specified with -k. default "/home/jjjjia/scripts/" 
 
