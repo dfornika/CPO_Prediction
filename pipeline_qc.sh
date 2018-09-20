@@ -12,7 +12,7 @@
 #J-J-J-Jia @ pipeline_qc.sh: runs seqtk, mash, kraken2 and fastqc for pre-assembly quality checks																									#
 #input parameters: 1 = id, 2= forward, 3 = reverse, 4 = output, 5=mashgenomerefdb, $6=mashplasmidrefdb, $7=kraken2db, $8=kraken2plasmiddb															#		
 #Requires: mash, kraken2, fastqc, seqtk	(all conda-ble)																																				#
-##~/scripts/pipeline_qc.sh BC16-Cfr035 /data/jjjjia/R1/BC16-Cfr035_S10_L001_R1_001.fastq.gz /data/jjjjia/R2/BC16-Cfr035_S10_L001_R2_001.fastq.gz /home/jjjjia/testCases/tests /home/jjjjia/databases/refseq.genomes.k21s1000.msh /home/jjjjia/databases/refseq.plasmid.k21s1000.msh /home/jjjjia/databases/k2std /home/jjjjia/databases/k2plasmid	#
+# pipeline_qc.sh BC16-Cfr035 BC16-Cfr035_S10_L001_R1_001.fastq.gz BC16-Cfr035_S10_L001_R2_001.fastq.gz output /data/ref_databases/mash/refseq.genomes.k21s1000.msh /data/ref_databases/mash/refseq.plasmid.k21s1000.msh /data/ref_databases/kraken2/2018-09-20_standard /data/ref_databases/kraken2/2018-09-20_plasmid	#
 #####################################################################################################################################################################################################
 
 #step 1, mash QC
@@ -72,7 +72,7 @@ mash screen -p "$threads" -w "$plasmidRefDB" "$qcOutDir"/concatRawReads.fastq | 
 
 source deactivate
 
-source activate fastqc
+source activate fastqc-0.11.7
 
 #fastqc of the forward and reverse reads
 echo "fastqc of reads"
@@ -83,6 +83,7 @@ rm -rf "$qcOutDir"/*.zip
 
 source deactivate
 
+source activate kraken2-2.0.7_beta
 echo "kraken2 classfiication of reads"
 
 #kraken2 species classification
@@ -90,12 +91,18 @@ kraken2 --db "$k2db" --paired --threads "$threads" --report "$qcOutDir"/kraken2.
 #kraken2 plasmid classification ~!use mash instead
 #kraken2 --db "$k2plasmid" --paired --threads "$threads" --report "$qcOutDir"/kraken2.plasmid.report --output "$qcOutDir"/kraken2.plasmid.classification "$R1" "$R2"
 
+source deactivate
+
+source activate seqtk-1.3
+
 #calculate the total number of basepairs in the read
 echo "calculating read stats"
 R1bp=`seqtk fqchk $R1 | head -3 | tail -1 | cut -d$'\t' -f 2`
 R2bp=`seqtk fqchk $R2 | head -3 | tail -1 | cut -d$'\t' -f 2`
 totalbp=$((R1bp+R2bp))
 echo $totalbp > "$qcOutDir"/totalbp
+
+source deactivate
 
 #estimate coverage ~! do it with python
 #kmc -m"$ram" -sm -n256 -ci3 -k25 -t"threads" "$R1" kmc ./temp
@@ -109,6 +116,4 @@ rm -rf "$qcOutDir"/concatRawReads.fastq.msh
 rm -rf "$qcOutDir"/R1.fastq
 rm -rf "$qcOutDir"/R1.fastq.msh
 
-
-source deactivate
 echo "done step 1"
