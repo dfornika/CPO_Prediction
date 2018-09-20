@@ -1,15 +1,15 @@
-#!/home/jjjjia/.conda/envs/py36/bin/python
+#!/usr/bin/env python
 
-#$ -S /home/jjjjia/.conda/envs/py36/bin/python
-#$ -V             # Pass environment variables to the job
-#$ -N CPO_pipeline    # Replace with a more specific job name
-#$ -wd /home/jjjjia/testCases           # Use the current working dir
-#$ -pe smp 8      # Parallel Environment (how many cores)
-#$ -l h_vmem=11G  # Memory (RAM) allocation *per core*
+#$ -S /home/dfornika/miniconda3/envs/cpo_pipeline/bin/python
+#$ -V                         # Pass environment variables to the job
+#$ -N CPO_pipeline
+#$ -wd /home/jjjjia/testCases # Use the current working dir
+#$ -pe smp 8                  # Parallel Environment (how many cores)
+#$ -l h_vmem=11G              # Memory (RAM) allocation *per core*
 #$ -e ./logs/$JOB_ID.err
 #$ -o ./logs/$JOB_ID.log
 #$ -m ea
-#$ -M bja20@sfu.ca
+
 
 #This script is a wrapper for module one of the cpo_workflow including QC and Assembly. It uses Mash2.0, Kraken2.0 and fastqc to check for sequence contamination, quality information and identify a reference genome. Then attempts to assemble the reads, attempting to filter contamination away if required.
 
@@ -39,14 +39,14 @@ if not debug:
     parser.add_option("-i", "--id", dest="id", type="string", help="identifier of the isolate")    
     parser.add_option("-f", "--forward", dest="R1", type="string", help="absolute file path forward read (R1)")
     parser.add_option("-r", "--reverse", dest="R2", type="string", help="absolute file path to reverse read (R2)")
-    parser.add_option("-m", "--mash-genomedb", dest="mashGenomeRefDB", default = "/home/jjjjia/databases/refseq.genomes.k21s1000.msh", type="string", help="absolute path to mash reference database")
-    parser.add_option("-n", "--mash-plasmiddb", dest="mashPlasmidRefDB", default = "/home/jjjjia/databases/refseq.plasmid.k21s1000.msh", type="string", help="absolute path to mash reference database")
-    parser.add_option("-z", "--kraken2-genomedb", dest="kraken2GenomeRefDB", default = "/home/jjjjia/databases/k2std", type="string", help="absolute path to kraken reference database")
-    parser.add_option("-v", "--kraken2-plasmiddb", dest="kraken2PlasmidRefDB", default = "/home/jjjjia/databases/k2plasmid", type="string", help="absolute path to kraken reference database")
-    parser.add_option("-x", "--busco-db", dest="buscodb", default = "/home/jjjjia/databases/enterobacteriales_odb9", type="string", help="absolute path to busco reference database")
+    parser.add_option("-m", "--mash-genomedb", dest="mashGenomeRefDB", default = "/data/ref_databases/mash/refseq.genomes.k21s1000.msh", type="string", help="absolute path to mash reference database")
+    parser.add_option("-n", "--mash-plasmiddb", dest="mashPlasmidRefDB", default = "/data/ref_databases/refseq.plasmid.k21s1000.msh", type="string", help="absolute path to mash reference database")
+    parser.add_option("-z", "--kraken2-genomedb", dest="kraken2GenomeRefDB", default = "/data/ref_databases/kraken2/2018-09-20_standard", type="string", help="absolute path to kraken reference database")
+    parser.add_option("-v", "--kraken2-plasmiddb", dest="kraken2PlasmidRefDB", default = "/data/ref_databases/kraken2/2018-09-20_plasmid", type="string", help="absolute path to kraken reference database")
+    parser.add_option("-x", "--busco-db", dest="buscodb", default = "/data/ref_databases/busco/enterobacteriales_odb9", type="string", help="absolute path to busco reference database")
 
     parser.add_option("-o", "--output", dest="output", default='./', type="string", help="absolute path to output folder")
-    parser.add_option("-k", "--script-path", dest="scriptDir", default="/home/jjjjia/scripts", type="string", help="absolute file path to this script folder")
+    parser.add_option("-k", "--script-path", dest="scriptDir", default="/home/dfornika/CPO_Prediction", type="string", help="absolute file path to this script folder")
 
     #used for parsing 
     parser.add_option("-e", "--expected", dest="expectedSpecies", default="NA/NA/NA", type="string", help="expected species of the isolate")

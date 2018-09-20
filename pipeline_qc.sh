@@ -16,7 +16,6 @@
 #####################################################################################################################################################################################################
 
 #step 1, mash QC
-source activate cpo_qc
 
 #set dem variables
 ID="$1"
@@ -58,6 +57,8 @@ mkdir -p "$mashResultDir"/"$ID"
 cat "$R1" "$R2" > "$qcOutDir"/concatRawReads.fastq
 cat "$R1" > "$qcOutDir"/R1.fastq
 
+source activate mash-2.0
+
 #get estimation of genome size (k-mer method)
 mash sketch -m 3 "$qcOutDir"/R1.fastq -o "$qcOutDir"/R1.fastq -p "$threads" -k 32 2> "$qcOutDir"/mash.log
 
@@ -69,12 +70,18 @@ mash screen -p "$threads" -w "$refDB" "$qcOutDir"/concatRawReads.fastq | sort -g
 echo "comparing to reference plasmid db"
 mash screen -p "$threads" -w "$plasmidRefDB" "$qcOutDir"/concatRawReads.fastq | sort -gr > "$qcOutDir"/mashscreen.plasmid.tsv
 
+source deactivate
+
+source activate fastqc
+
 #fastqc of the forward and reverse reads
 echo "fastqc of reads"
 fastqc "$R1" -o "$qcOutDir" --extract
 fastqc "$R2" -o "$qcOutDir" --extract
 rm -rf "$qcOutDir"/*.html
 rm -rf "$qcOutDir"/*.zip
+
+source deactivate
 
 echo "kraken2 classfiication of reads"
 
