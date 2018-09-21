@@ -52,9 +52,12 @@ echo "step2: assembly"
 assemblyOutDir="$assemblyDir/$ID"
 #mkdir -p "$assemblyDir/$ID"
 
-source activate cpo_assembly
-shovill --R1 "$R1" --R2 "$R2" --cpus "$threads" --ram "$ram" --tmpdir "$tempDir" --outdir "$assemblyOutDir"
+source activate shovill-1.0.1
+
+shovill --force --R1 "$R1" --R2 "$R2" --cpus "$threads" --ram "$ram" --tmpdir "$tempDir" --outdir "$assemblyOutDir"
 #make the contigs dir in cwd
+
+source deactivate
 
 #move all the assemblies to the new phone.
 if [ -f "$assemblyOutDir/contigs.fa" ]
@@ -65,27 +68,27 @@ else
 	exit 818
 fi
 
+source activate quast-4.6.3
+
 #run quast on assembled genome
 mkdir -p "$qcDir"/"$ID"
-cd "$qcDir"/"$ID"
 quast "$contigsDir/$ID.fa" -R "$refGenome" -o "$qcDir/$ID/$ID.quast" --threads "$threads"
+
+source deactivate
 
 #contamination genomes
 #bbsplit.sh in1=BC16-Cfr035_S10_L001_R1_001.fastq.gz in2=BC16-Cfr035_S10_L001_R2_001.fastq.gz ref=ref1,ref2,ref3 basename=o%_#.fq outu1=unmap1.fq outu2=unmap2.fq
 #metaquast BC16-Cfr035_S10.fa -R ref1,ref2,ref3 --threads 8 -o result
-source deactivate
 
-
-source activate cpo_busco
+source activate busco-3.0.2
 
 cd "$qcDir"/"$ID"
-#have to run busco with 1 threads cuz it throws some error about tblastn crashing when multithreaddin
-run_busco -i "$contigsDir/$ID.fa" -o "$ID.busco" -l $buscoDB -m genome -c 1 -sp E_coli_K12 -f
+run_busco -i "../../../../$contigsDir/$ID.fa" -o "$ID.busco" -l $buscoDB -m genome -c 8 -sp E_coli_K12 -f
 mv "run_$ID".busco "$ID".busco
 
 source deactivate
 
-rm -rf cd "$qcDir"/"$ID"/tmp
+rm -rf "$qcDir"/"$ID"/tmp
 rm -rf "$tempDir"
 
 echo "done step 2"
