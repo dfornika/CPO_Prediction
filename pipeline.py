@@ -1,15 +1,4 @@
-#!/usr/bin/env python
-
-#$ -S /home/dfornika/miniconda3/envs/cpo_pipeline/bin/python
-#$ -V                         # Pass environment variables to the job
-#$ -N CPO_pipeline
-#$ -cwd /home/jjjjia/testCases # Use the current working dir
-#$ -pe smp 8                  # Parallel Environment (how many cores)
-#$ -l h_vmem=11G              # Memory (RAM) allocation *per core*
-#$ -e ./logs/$JOB_ID.err
-#$ -o ./logs/$JOB_ID.log
-#$ -m ea
-
+#!/opt/miniconda2/envs/python-3.6/bin/python
 
 #This script is a wrapper for module one of the cpo_workflow including QC and Assembly. It uses Mash2.0, Kraken2.0 and fastqc to check for sequence contamination, quality information and identify a reference genome. Then attempts to assemble the reads, attempting to filter contamination away if required.
 
@@ -40,13 +29,13 @@ if not debug:
     parser.add_option("-f", "--forward", dest="R1", type="string", help="absolute file path forward read (R1)")
     parser.add_option("-r", "--reverse", dest="R2", type="string", help="absolute file path to reverse read (R2)")
     parser.add_option("-m", "--mash-genomedb", dest="mashGenomeRefDB", default = "/data/ref_databases/mash/refseq.genomes.k21s1000.msh", type="string", help="absolute path to mash reference database")
-    parser.add_option("-n", "--mash-plasmiddb", dest="mashPlasmidRefDB", default = "/data/ref_databases/refseq.plasmid.k21s1000.msh", type="string", help="absolute path to mash reference database")
+    parser.add_option("-n", "--mash-plasmiddb", dest="mashPlasmidRefDB", default = "/data/ref_databases/mash/refseq.plasmid.k21s1000.msh", type="string", help="absolute path to mash reference database")
     parser.add_option("-z", "--kraken2-genomedb", dest="kraken2GenomeRefDB", default = "/data/ref_databases/kraken2/2018-09-20_standard", type="string", help="absolute path to kraken reference database")
     parser.add_option("-v", "--kraken2-plasmiddb", dest="kraken2PlasmidRefDB", default = "/data/ref_databases/kraken2/2018-09-20_plasmid", type="string", help="absolute path to kraken reference database")
     parser.add_option("-x", "--busco-db", dest="buscodb", default = "/data/ref_databases/busco/enterobacteriales_odb9", type="string", help="absolute path to busco reference database")
 
     parser.add_option("-o", "--output", dest="output", default='./', type="string", help="absolute path to output folder")
-    parser.add_option("-k", "--script-path", dest="scriptDir", default="/home/dfornika/CPO_Prediction", type="string", help="absolute file path to this script folder")
+    parser.add_option("-k", "--script-path", dest="scriptDir", default="/home/dfornika/code/CPO_Prediction", type="string", help="absolute file path to this script folder")
 
     #used for parsing 
     parser.add_option("-e", "--expected", dest="expectedSpecies", default="NA/NA/NA", type="string", help="expected species of the isolate")
@@ -288,6 +277,7 @@ class RGIResult(object):
 #region useful functions
 def read(path):
     return [line.rstrip('\n') for line in open(path)]
+
 def execute(command):
     process = subprocess.Popen(command, shell=False, cwd=curDir, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -306,12 +296,14 @@ def execute(command):
         return output
     else:
         raise subprocess.CalledProcessError(exitCode, command)
+
 def httpGetFile(url, filepath=""):
     if (filepath == ""):
         return urllib.request.urlretrieve(url)
     else:
         urllib.request.urlretrieve(url, filepath)
         return True
+
 def gunzip(inputpath="", outputpath=""):
     if (outputpath == ""):
         with gzip.open(inputpath, 'rb') as f:
@@ -323,6 +315,7 @@ def gunzip(inputpath="", outputpath=""):
         with open(outputpath, 'wb') as out:
             out.write(gzContent)
         return True
+
 def ToJson(dictObject, outputPath):
     outDir = outputDir + '/summary/' + ID + ".json/"
     #if not (os.path.exists(outDir)):
