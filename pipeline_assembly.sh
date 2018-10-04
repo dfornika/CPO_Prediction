@@ -83,7 +83,7 @@ source deactivate
 source activate busco-3.0.2
 
 cd "$qcDir"/"$ID"
-run_busco -i "../../../../$contigsDir/$ID.fa" -o "$ID.busco" -l $buscoDB -m genome -c 8 -sp E_coli_K12 -f
+run_busco -i "../../../$contigsDir/$ID.fa" -o "$ID.busco" -l $buscoDB -m genome -c 8 -sp E_coli_K12 -f
 mv "run_$ID".busco "$ID".busco
 
 source deactivate
