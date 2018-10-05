@@ -638,8 +638,8 @@ def Main(ID, R1, R2, expectedSpecies):
         output.append("!!!The expected species is NOT predicted by kraken2, contamination? mislabeling?")
         notes.append("Kraken2: Not expected species. Possible contamination or mislabeling")
 
-    if (depth < 15):
-        output.append("!!!Coverage is lower than 15. Estimated depth: " + str(depth))
+    if (depth < 30):
+        output.append("!!!Coverage is lower than 30. Estimated depth: " + str(depth))
 
     if(PhiX):
         output.append("!!!PhiX contamination, probably nothing to worry about")

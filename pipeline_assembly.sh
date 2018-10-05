@@ -54,7 +54,7 @@ assemblyOutDir="$assemblyDir/$ID"
 
 source activate shovill-1.0.1
 
-shovill --force --R1 "$R1" --R2 "$R2" --cpus "$threads" --ram "$ram" --tmpdir "$tempDir" --outdir "$assemblyOutDir"
+shovill --mincov 3 --minlen 500 --force --R1 "$R1" --R2 "$R2" --cpus "$threads" --ram "$ram" --tmpdir "$tempDir" --outdir "$assemblyOutDir"
 #make the contigs dir in cwd
 
 source deactivate
