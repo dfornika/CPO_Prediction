@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 #$ -V             # Pass environment variables to the job
-#$ -N CPO_pipeline    # Replace with a more specific job name
+#$ -N cpo_pipeline
 #$ -cwd           # Use the current working dir
 #$ -pe smp 8      # Parallel Environment (how many cores)
 #$ -l h_vmem=11G  # Memory (RAM) allocation *per core*
@@ -60,11 +60,13 @@ echo "step2: assembly"
 
 #mkdir -p "$assemblyDir/$ID"
 
-source activate cpo_assembly
+source activate bbmap-38.22
 
 #try to seperate out the contaminant reads
 cd $tempDir #bbsplit creates temp files in the current directory that cannot be changed. cd first to keep it clean
 bbsplit.sh in1="$R1" in2="$R2" ref="$refGenome" basename="$splitOutDir"/"$ID"%_#.fq outu1="$splitOutDir"/"$ID"_unmap1.fq outu2="$splitOutDir"/"$ID"_unmap2.fq t="$threads" -Xmx"$ram"g
+
+source deactivate
 
 #assembled all the contaminant reads
 IFS=',' read -ra ADDR <<< "$refGenome" #hax to read in a csv
@@ -74,8 +76,13 @@ for i in "${ADDR[@]}"; do
 	assemblyOutDir="$assemblyDir/$ID/$refG"
 	R1Proper="$splitOutDir"/"$ID""$refG"_1.fq
 	R2Proper="$splitOutDir"/"$ID""$refG"_2.fq
-    shovill --R1 "$R1Proper" --R2 "$R2Proper" --cpus "$threads" --ram "$ram" --tmpdir "$tempDir" --outdir "$assemblyOutDir" 
 
+	source activate shovill-1.0.1
+	
+	shovill --R1 "$R1Proper" --R2 "$R2Proper" --cpus "$threads" --ram "$ram" --tmpdir "$tempDir" --outdir "$assemblyOutDir" 
+
+	source deactivate
+	
 	contigProper="$contigsDir"/"$ID"."$refG".fa
 	#move all the assemblies to the new phone.
 	if [ -f "$assemblyOutDir/contigs.fa" ]
@@ -89,19 +96,21 @@ for i in "${ADDR[@]}"; do
 	mkdir -p "$qcDir"/"$ID"
 	cd "$qcDir"/"$ID"
 
-	
 	#run metaquast on 1 of the contaminant genomes
+	
+	source activate quast-4.6.3
+	
 	metaquast "$contigProper" -R "$refGenome" --threads "$threads" -o "$qcDir/$ID/$ID.$refG.quast"
+	
+	source deactivate
 done
 
-
-#contamination genomes
-source deactivate
-
-source activate cpo_busco
 cd "$qcDir"/"$ID"
 
 #run busco on all the assembled contaminant genomes
+
+source activate busco-3.0.2
+
 IFS=',' read -ra ADDR <<< "$refGenome" #hax to read in a csv
 for i in "${ADDR[@]}"; do
 	refG=`basename $i`
