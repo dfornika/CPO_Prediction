@@ -17,7 +17,6 @@
 
 #step 1, mash QC
 
-#set dem variables
 ID="$1"
 R1="$2"
 R2="$3"
@@ -29,7 +28,6 @@ k2plasmid="$8"
 threads=8
 ram=80
 
-#print dem variables
 echo "parameters: "
 echo "ID: $ID"
 echo "R1: $R1"
@@ -72,10 +70,11 @@ mash screen -p "$threads" -w "$plasmidRefDB" "$qcOutDir"/concatRawReads.fastq | 
 
 source deactivate
 
-source activate fastqc-0.11.7
-
 #fastqc of the forward and reverse reads
 echo "fastqc of reads"
+
+source activate fastqc-0.11.7
+
 fastqc "$R1" -o "$qcOutDir" --extract
 fastqc "$R2" -o "$qcOutDir" --extract
 rm -rf "$qcOutDir"/*.html
@@ -83,32 +82,26 @@ rm -rf "$qcOutDir"/*.zip
 
 source deactivate
 
-source activate kraken2-2.0.7_beta
+#kraken2 species classification
 echo "kraken2 classfiication of reads"
 
-#kraken2 species classification
+source activate kraken2-2.0.7_beta
+
 kraken2 --db "$k2db" --paired --threads "$threads" --report "$qcOutDir"/kraken2.genome.report --output "$qcOutDir"/kraken2.genome.classification "$R1" "$R2"
-#kraken2 plasmid classification ~!use mash instead
-#kraken2 --db "$k2plasmid" --paired --threads "$threads" --report "$qcOutDir"/kraken2.plasmid.report --output "$qcOutDir"/kraken2.plasmid.classification "$R1" "$R2"
 
 source deactivate
 
-source activate seqtk-1.3
-
 #calculate the total number of basepairs in the read
 echo "calculating read stats"
+
+source activate seqtk-1.3
+
 R1bp=`seqtk fqchk $R1 | head -3 | tail -1 | cut -d$'\t' -f 2`
 R2bp=`seqtk fqchk $R2 | head -3 | tail -1 | cut -d$'\t' -f 2`
 totalbp=$((R1bp+R2bp))
 echo $totalbp > "$qcOutDir"/totalbp
 
 source deactivate
-
-#estimate coverage ~! do it with python
-#kmc -m"$ram" -sm -n256 -ci3 -k25 -t"threads" "$R1" kmc ./temp
-
-#refGenomeSize=`grep -v ">" refbc11 | wc | awk '{print $3-$1}'`
-#echo $refGenomeSize > "$qcOutDir"/refGenomeSize
 
 echo "cleaning up..."
 rm -rf "$qcOutDir"/concatRawReads.fastq
